@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { formatJSON11 } = require('../utils/format');
-const { lookupUPC, lookupDatabase } = require('../utils/products');
+const { lookupUPC, lookupDatabase, createProduct } = require('../utils/products');
 const knex = require('../config/knex');
 const pjson = require('../package.json');
 const config = require('../config')
@@ -11,8 +11,13 @@ router.get('/lookup/:upc', async (req, res) => {
     const [product] = await Promise.all([
         lookupDatabase(upc)
     ])
-    
-    if(Object.keys(product).length !== 0) {
+    console.log(`---------------`)
+    console.log(product);
+    console.log(`------------------`)
+    if(product){
+    // if(Object.keys(product).length !== 0) {
+        // product[0].append({source: 'database'});
+        console.log({...product, source: 'database'})
         return res.json(formatJSON11(product))
     }
     else{
@@ -20,8 +25,9 @@ router.get('/lookup/:upc', async (req, res) => {
         const [prod] = await Promise.all([
             lookupUPC(upc)
         ])
+        createProduct(prod);
         // console.log(prod)
-        return res.json(prod)
+        return res.json(formatJSON11(prod))
     }
     
     

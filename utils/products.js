@@ -1,14 +1,20 @@
 'use strict';
 const knex = require('../config/knex');
 const axios = require('axios');
+const db = require('../models');
 
 const lookupDatabase = (upc) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const p = await knex.select('*')
-                .from('products')
-                .where('upc', '=', upc)
-            resolve(p);
+            let p = await db.sequelize.models.products.findOne({
+                where: { upc: upc }
+            }) 
+            if(p){
+                resolve(p);
+            }
+            else{
+                resolve(null);
+            }
         }
         catch (error) {
             console.log(error);
@@ -38,11 +44,39 @@ const lookupUPC = (upc) => {
                         "Priority": "u=0, i"
                     },
                 };
-
+                let productData = {upc: upc}
                 axios.request(config)
                     .then((response) => {
-                        console.log(response.data)
-                        resolve(response.data)
+                        const d = response.data.split('\n')
+                        d.forEach((v, k) =>{
+                            if(v.includes('<title>')){
+                                productData.description = v.replace('<title>','')
+                                .replace('</title>','')
+                                .replace(/— UPC [0-9]* — Go-UPC/g, '')
+                                .replace('&amp;', '&')
+                                .trimLeft()
+                                .trimRight();
+                                console.log(`found title: ${productData.description}`)
+                            }
+                            else if(v.includes('Category') && v.includes('<td')){
+                                productData.category = d[k+1].replace('<td>','')
+                                .replace('</td>', '')
+                                .replace('&amp;', '&')
+                                .trimLeft()
+                                .trimRight();
+                                console.log(`here is the category: ${d[k+1]}`)
+                                console.log(` line before: ${d[k]}`)
+                            }
+                            else if(v.includes('aws')){
+                                productData.imgURL = v
+                                .replace('<img src=', '')
+                                // .replace(/alt[A-Za-z0-9]*/g, '');
+                                console.log(v)
+                            
+                            }
+                            // console.log(`${k} => ${v}`)
+                        })
+                        resolve(productData)
                     })
             
         }
@@ -53,7 +87,23 @@ const lookupUPC = (upc) => {
     });
 }
 
+const createProduct = (product) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await db.sequelize.models.products.upsert(product);
+            let p = await db.sequelize.models.products.findOne({
+                where: { upc: product.upc}
+            });
+            resolve(p);
+        }
+        catch (error) {
+            console.log(error);
+            reject(new Error(`Cannot create product`));
+        }
+    });
+}
 module.exports = {
     lookupDatabase,
-    lookupUPC
+    lookupUPC,
+    createProduct
 };
