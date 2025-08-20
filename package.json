@@ -1,6 +1,6 @@
 {
   "name": "charitycc",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Charity Care Closet",
   "main": "server.js",
   "scripts": {
