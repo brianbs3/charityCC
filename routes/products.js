@@ -1,9 +1,10 @@
 const router = require('express').Router();
 const { formatJSON11 } = require('../utils/format');
 const { lookupUPC, lookupDatabase, createProduct } = require('../utils/products');
-const knex = require('../config/knex');
+// const knex = require('../config/knex');
 const pjson = require('../package.json');
 const config = require('../config')
+const db = require('../models');
 
 router.get('/lookup/:upc', async (req, res) => {
     const { upc } = req.params;
@@ -11,13 +12,10 @@ router.get('/lookup/:upc', async (req, res) => {
     const [product] = await Promise.all([
         lookupDatabase(upc)
     ])
-    console.log(`---------------`)
-    console.log(product);
-    console.log(`------------------`)
     if(product){
     // if(Object.keys(product).length !== 0) {
         // product[0].append({source: 'database'});
-        console.log({...product, source: 'database'})
+        // console.log({...product, source: 'database'})
         return res.json(formatJSON11(product))
     }
     else{
@@ -33,15 +31,25 @@ router.get('/lookup/:upc', async (req, res) => {
     
 });
 
-router.get('/', (req, res) => {
-    knex.select()
-        .from('products')
-        .orderBy('description')
-        .then(
-            m => {
-                return res.json(formatJSON11(m));
-            }
-        );
+router.get('/', async (req, res) => {
+    let p = await db.sequelize.models.products.findAll();
+    return res.json(formatJSON11(p));
+    //             if(p){
+    //                 p.dataValues.source = "database";
+                    
+    //                 resolve(p);
+    //             }
+    //             else{
+    //                 resolve(null);
+    //             }
+    // knex.select()
+    //     .from('products')
+    //     .orderBy('description')
+    //     .then(
+    //         m => {
+    //             return res.json(formatJSON11(m));
+    //         }
+    //     );
 });
 
 module.exports = router;

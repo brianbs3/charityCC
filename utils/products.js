@@ -1,5 +1,5 @@
 'use strict';
-const knex = require('../config/knex');
+// const knex = require('../config/knex');
 const axios = require('axios');
 const db = require('../models');
 
@@ -10,6 +10,8 @@ const lookupDatabase = (upc) => {
                 where: { upc: upc }
             }) 
             if(p){
+                p.dataValues.source = "database";
+                
                 resolve(p);
             }
             else{
@@ -24,6 +26,7 @@ const lookupDatabase = (upc) => {
 }
 
 const lookupUPC = (upc) => {
+    // get data from go-upc.com
     return new Promise(async (resolve, reject) => {
         try {
                 let config = {
@@ -76,6 +79,7 @@ const lookupUPC = (upc) => {
                             }
                             // console.log(`${k} => ${v}`)
                         })
+                        productData.source = "go-upc.com";
                         resolve(productData)
                     })
             
