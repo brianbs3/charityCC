@@ -15,14 +15,17 @@ lookupProduct = () => {
             setTimeout(() => { $('#ccc_toast').hide() }, 3000)
         }
         else{
+            $('#ccc_toast_body').html(`Looking up ${upc}`)
+            $('#ccc_toast').show()
             $.ajax({
                     type: 'GET',
                     url: `/products/lookup/${upc}`,
                     success: function (data) {
-                        $('#lookupProductDescription').val(data.data.description)
-                        $('#lookupProductCategory').val(data.data.category)
-                        $('#lookupProductSource').val(data.data.source)
-                        
+                        console.log(data);
+                        $('#lookupProductDescription').val(data.title)
+                        $('#lookupProductCategory').val(data.category)
+                        $('#lookupProductSource').val(data.source)
+                        $('#ccc_toast').hide()
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
                     console.log("error")

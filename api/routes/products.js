@@ -5,9 +5,7 @@ const { lookupUPC, lookupDatabase, createProduct } = require('../utils/products'
 const pjson = require('../package.json');
 const config = require('../config')
 const db = require('../models');
-const { MongoClient } = require('mongodb');
-const uri = config.MONGO_DB;
-const client = new MongoClient(uri);
+
 
 router.get('/lookup_mongo/:upc', async (req, res) => {
     const { upc } = req.params;
@@ -46,10 +44,7 @@ router.get('/lookup/:upc', async (req, res) => {
         lookupDatabase(upc)
     ])
     if(product){
-    // if(Object.keys(product).length !== 0) {
-        // product[0].append({source: 'database'});
-        // console.log({...product, source: 'database'})
-        return res.json(formatJSON11(product))
+        return res.json(product)
     }
     else{
         console.log(`${upc} not found`)
@@ -58,7 +53,8 @@ router.get('/lookup/:upc', async (req, res) => {
         ])
         createProduct(prod);
         // console.log(prod)
-        return res.json(formatJSON11(prod))
+        // console.log(prod);
+        return res.json(prod)
     }
     
     
