@@ -21,6 +21,7 @@ lookupProduct = () => {
                     success: function (data) {
                         $('#lookupProductDescription').val(data.data.description)
                         $('#lookupProductCategory').val(data.data.category)
+                        $('#lookupProductSource').val(data.data.source)
                         
                     },
                     error: function (jqXHR, textStatus, errorThrown) {

@@ -21,6 +21,9 @@ app.use('/patrons', patrons);
 const products = require('./routes/products');
 app.use('/products', products);
 
+const books = require('./routes/books');
+app.use('/books', books);
+
 const PORT = process.env.PORT || 8087;
 app.listen(PORT, () => {
     console.log(`App listening on port ${PORT}`);

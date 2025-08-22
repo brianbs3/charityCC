@@ -50,37 +50,44 @@ const lookupUPC = (upc) => {
                 let productData = {upc: upc}
                 axios.request(config)
                     .then((response) => {
-                        const d = response.data.split('\n')
-                        d.forEach((v, k) =>{
-                            if(v.includes('<title>')){
-                                productData.description = v.replace('<title>','')
-                                .replace('</title>','')
-                                .replace(/— UPC [0-9]* — Go-UPC/g, '')
-                                .replace('&amp;', '&')
-                                .trimLeft()
-                                .trimRight();
-                                console.log(`found title: ${productData.description}`)
-                            }
-                            else if(v.includes('Category') && v.includes('<td')){
-                                productData.category = d[k+1].replace('<td>','')
-                                .replace('</td>', '')
-                                .replace('&amp;', '&')
-                                .trimLeft()
-                                .trimRight();
-                                console.log(`here is the category: ${d[k+1]}`)
-                                console.log(` line before: ${d[k]}`)
-                            }
-                            else if(v.includes('aws')){
-                                productData.imgURL = v
-                                .replace('<img src=', '')
-                                // .replace(/alt[A-Za-z0-9]*/g, '');
-                                console.log(v)
-                            
-                            }
-                            // console.log(`${k} => ${v}`)
-                        })
-                        productData.source = "go-upc.com";
-                        resolve(productData)
+                        console.log(response.status)
+                        if(response.status !== 200){
+                            resolve({status: response.status})
+                        }
+                        else{
+                            const d = response.data.split('\n')
+                            d.forEach((v, k) => {
+                                if (v.includes('<title>')) {
+                                    productData.description = v.replace('<title>', '')
+                                        .replace('</title>', '')
+                                        .replace(/— UPC [0-9]* — Go-UPC/g, '')
+                                        .replace('&amp;', '&')
+                                        .trimLeft()
+                                        .trimRight();
+                                    console.log(`found title: ${productData.description}`)
+                                }
+                                else if (v.includes('Category') && v.includes('<td')) {
+                                    productData.category = d[k + 1].replace('<td>', '')
+                                        .replace('</td>', '')
+                                        .replace('&amp;', '&')
+                                        .trimLeft()
+                                        .trimRight();
+                                    console.log(`here is the category: ${d[k + 1]}`)
+                                    console.log(` line before: ${d[k]}`)
+                                }
+                                else if (v.includes('aws')) {
+                                    productData.imgURL = v
+                                        .replace('<img src=', '')
+                                    // .replace(/alt[A-Za-z0-9]*/g, '');
+                                    console.log(v)
+
+                                }
+                                // console.log(`${k} => ${v}`)
+                            })
+                            productData.source = "go-upc.com";
+                            resolve(productData)
+                        }
+                        
                     })
             
         }
