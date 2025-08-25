@@ -19,7 +19,7 @@ const lookupDatabase = (upc) => {
             const specificOptions = {};
 
             const p = await collection.findOne(specificQuery, specificOptions);
-            console.log("Single document with selected field:", p);
+    
             if(p){
                 p.source = "database";
                 resolve(p)
@@ -154,8 +154,62 @@ const createProduct = (product) => {
         }
     });
 }
+
+const updateProduct = (product) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            console.log('trying to update')
+            console.log(product)
+            
+            await client.connect()
+            const filter = {upc: product.upc}
+            const database = client.db("charityCC");
+            const collection = database.collection("products");
+            const p = await collection.updateOne({upc: product.upc},
+                { $set: product },
+                { upsert: true }
+            )
+            resolve(product);
+        }
+        catch (error) {
+            console.log(error);
+            reject(new Error(`Cannot create product`));
+        }
+        finally {
+            client.close();
+        }
+    });
+}
+const getAllProducts = async () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            console.log('connect to db...')
+            await client.connect();
+            const database = client.db("charityCC"); // Replace with your database name
+            const collection = database.collection("products"); // Replace with your collection name
+
+            // Example 1: Select 'name' and 'address' fields, exclude '_id'
+            const query = {}; // Empty query to select all documents
+            const options = {};
+
+            const documents = await collection.find(query, options).toArray();
+            // console.log("Documents with selected fields:", documents);
+            
+            resolve(documents);
+
+        } catch(error){
+            // console.log(error)
+            reject('error getting all products')
+        }
+        finally {
+            await client.close();
+        }
+    });
+}
 module.exports = {
     lookupDatabase,
     lookupUPC,
-    createProduct
+    createProduct,
+    getAllProducts,
+    updateProduct
 };
