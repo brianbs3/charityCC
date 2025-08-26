@@ -1,6 +1,7 @@
 'use strict';
 // const knex = require('../config/knex');
 const axios = require('axios');
+const fs = require('fs');
 const db = require('../models'); 
 const config = require('../config')
 const { MongoClient } = require('mongodb');
@@ -227,7 +228,7 @@ const getAllProducts = async () => {
             resolve(documents);
 
         } catch(error){
-            // console.log(error)
+            console.log(error)
             reject('error getting all products')
         }
         finally {
@@ -235,6 +236,21 @@ const getAllProducts = async () => {
         }
     });
 }
+
+const download_image = (url, image_path) =>
+  axios({
+    url,
+    responseType: 'stream',
+  }).then(
+    response =>
+      new Promise((resolve, reject) => {
+        response.data
+          .pipe(fs.createWriteStream(`./static/images/${image_path}`))
+          .on('finish', () => resolve())
+          .on('error', e => reject(e));
+      }),
+  );
+
 module.exports = {
     lookupDatabase,
     lookupUPC_upcitemdb,
@@ -242,5 +258,6 @@ module.exports = {
     lookupUPC_openfoodfacts,
     createProduct,
     getAllProducts,
-    updateProduct
+    updateProduct,
+    download_image
 };

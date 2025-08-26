@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { formatJSON11 } = require('../utils/format');
-const { lookupUPC_upcitemdb, lookupUPC_upcdatabase, lookupUPC_openfoodfacts, lookupDatabase, createProduct, getAllProducts, updateProduct } = require('../utils/products');
+const { lookupUPC_upcitemdb, lookupUPC_upcdatabase, download_image, lookupUPC_openfoodfacts, lookupDatabase, createProduct, getAllProducts, updateProduct } = require('../utils/products');
 // const knex = require('../config/knex');
 const pjson = require('../package.json');
 const config = require('../config')
@@ -35,38 +35,41 @@ router.get('/lookup_mongo/:upc', async (req, res) => {
 });
 
 router.get('/lookup/:upc', async (req, res) => {
-    const { upc } = req.params;
-    console.log(`upc: ${upc}`)
-    const [product] = await Promise.all([
-        lookupDatabase(upc)
-    ])
-    if(product){
-        return res.json(product)
-    }
-    else{
-        console.log(`${upc} not found`)
-        const [prod] = await Promise.all([
-            lookupUPC_upcitemdb(upc),
+    try{
+        const { upc } = req.params;
+        console.log(`upc: ${upc}`)
+        const [product] = await Promise.all([
+            lookupDatabase(upc)
         ])
-
-        if(Object.keys(prod.items).length === 0){
-            const [upcdatabase, openFoodFacts] = await Promise.all([
-            // const [openFoodFacts] = await Promise.all([
-                lookupUPC_upcdatabase(upc),
-                lookupUPC_openfoodfacts(upc)
-            ])
-            console.log(upcdatabase);
-            console.log(openFoodFacts);
+        if(product){
+            return res.json(product)
         }
-        
-        createProduct(prod);
-        // console.log(prod)
-        // console.log(alternate);
-        
-        return res.json(prod)
+        else{
+            console.log(`${upc} not found`)
+            const [prod] = await Promise.all([
+                lookupUPC_upcitemdb(upc),
+            ])
+
+            if(Object.keys(prod.items).length === 0){
+            }
+                const [upcdatabase, openFoodFacts] = await Promise.all([
+                // const [openFoodFacts] = await Promise.all([
+                    lookupUPC_upcdatabase(upc),
+                    lookupUPC_openfoodfacts(upc)
+                ])
+                console.log(upcdatabase);
+                console.log(openFoodFacts);
+            
+            createProduct(prod);
+            // console.log(prod)
+            // console.log(alternate);
+            
+            return res.json(prod)
+        }
     }
-    
-    
+    catch(error) {
+        console.log(error)
+    }
 });
 
 router.get('/details/:upc', async (req, res) => {
@@ -128,23 +131,18 @@ router.post('/add', async (req, res) => {
         console.log(error)
         return res.json(error)
     }
-    // let p = await db.sequelize.models.products.findAll();
-    // return res.json(formatJSON11(p));
-    //             if(p){
-    //                 p.dataValues.source = "database";
-
-    //                 resolve(p);
-    //             }
-    //             else{
-    //                 resolve(null);
-    //             }
-    // knex.select()
-    //     .from('products')
-    //     .orderBy('description')
-    //     .then(
-    //         m => {
-    //             return res.json(formatJSON11(m));
-    //         }
-    //     );
 });
+
+router.post('/download_image/:upc', async (req, res) => {
+    console.log(req.body)
+    const { upc } = req.params;
+    const {url} = req.body;
+    try {
+        download_image(url, `${upc}`)
+    }
+    catch(error) {
+        console.log(error);
+    }
+});
+
 module.exports = router;
