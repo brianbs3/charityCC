@@ -67,7 +67,7 @@ lookupProduct = () => {
                                 let imgSrc = "";
                                 Object.keys(item.images).forEach((v) =>{
                                     console.log(item.images[v]);
-                                    imgSrc += `<img width=200 height=200 src='${item.images[v]}'><br>`
+                                    imgSrc += `<img width=200 height=200 src='${item.images[v]}' onClick="useThisImage('${item.images[v]}', '${upc}');"><br>`
                                 })
                                 $('#itemPics').html(imgSrc);
                             }
@@ -206,4 +206,22 @@ truncateString = (str, maxLength=20) => {
         // Otherwise, return the original string
         return str;
     }
+}
+
+useThisImage = (imgURL, upc) => {
+    console.log(`we're going to use this image: ${imgURL}`)
+    $.ajax({
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({url: `${imgURL}`}),
+        url: `/products/download_image/${upc}`,
+        success: function (d) {
+            console.log(d)
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.readyState == 0)
+                window.location.replace(global_site_redirect);
+            $("#bsNetworkStatus").html(jqXHR);
+        }
+    });
 }
