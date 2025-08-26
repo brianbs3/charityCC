@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { formatJSON11 } = require('../utils/format');
-const { lookupUPC, lookupDatabase, createProduct, getAllProducts, updateProduct } = require('../utils/products');
+const { lookupUPC_upcitemdb, lookupUPC_upcdatabase, lookupUPC_openfoodfacts, lookupDatabase, createProduct, getAllProducts, updateProduct } = require('../utils/products');
 // const knex = require('../config/knex');
 const pjson = require('../package.json');
 const config = require('../config')
@@ -46,11 +46,23 @@ router.get('/lookup/:upc', async (req, res) => {
     else{
         console.log(`${upc} not found`)
         const [prod] = await Promise.all([
-            lookupUPC(upc)
+            lookupUPC_upcitemdb(upc),
         ])
+
+        if(Object.keys(prod.items).length === 0){
+            const [upcdatabase, openFoodFacts] = await Promise.all([
+            // const [openFoodFacts] = await Promise.all([
+                lookupUPC_upcdatabase(upc),
+                lookupUPC_openfoodfacts(upc)
+            ])
+            console.log(upcdatabase);
+            console.log(openFoodFacts);
+        }
+        
         createProduct(prod);
         // console.log(prod)
-        // console.log(prod);
+        // console.log(alternate);
+        
         return res.json(prod)
     }
     
@@ -104,7 +116,7 @@ router.get('/', async (req, res) => {
 router.post('/add', async (req, res) => {
     try {
         console.log('add product')
-        const { upc, description,category,source} = req.body;
+        const { upc, description,category,source, brand} = req.body;
         
         const [product] = await Promise.all([
             updateProduct(req.body)

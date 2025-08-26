@@ -35,104 +35,124 @@ const lookupDatabase = (upc) => {
     });
 }
 
-const lookupUPC = (upc) => {
+const lookupUPC_upcitemdb = (upc) => {
     // get data from go-upc.com
     return new Promise(async (resolve, reject) => {
         try{
+            // const cfg = {
+            //     method: 'get',
+            //     url: `https://api.upcdatabase.org/product/${upc}\?apikey\=${config.UPCDATABASE_KEY}`
+            // }
             const cfg = {
                 method: 'get',
-                url: `https://api.upcdatabase.org/product/${upc}\?apikey\=${config.UPCDATABASE_KEY}`
+                url: `https://api.upcitemdb.com/prod/trial/lookup?upc=${upc}`
             }
             axios.request(cfg)
                 .then((response) => {
-                    console.log(response.status)
+                    // console.log(response.status)
+                    // console.log(response.headers)
+                    
+                    console.log('------------------', `Lookups remaining: ${response.headers['x-ratelimit-remaining']}`, '------------------')
+                    
                     if(response.status !== 200){
                         resolve({status: response.status})
                     }
                     else{
-                        response.data.source = "upcdatabase.org";
+                        // response.data.source = "upcdatabase.org";
+                        response.data.source = "upcitemdb.com"
                         response.data.upc = upc;
                         resolve(response.data)
                     }
-                });
+                })
+                .catch(error => {
+                    resolve(error.response.status)
+                })
         }
         catch (error) {
             console.log(error);
             reject(new Error(`Cannot get product`));
         }
-        // try {
-        //         let config = {
-        //             method: 'get',
-        //             maxBodyLength: Infinity,
-        //             url: `https://go-upc.com/search?q=${upc}`,
-        //             headers: {
-        //                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        //                 "Sec-Fetch-Site": "same-origin",
-        //                 "Cookie": "_ga=GA1.1.1326062523.1755383298; _ga_307JM7VHSK=GS2.1.s1755383297$o1$g1$t1755383589$j60$l0$h0; _gcl_au=1.1.906543732.1755383298; JSESSIONID=node01snacln8gf632gnx0zsaw8rr9887383.node0",
-        //                 "Referer": "https://go-upc.com/search?q=024000163077",
-        //                 "Sec-Fetch-Dest": "document",
-        //                 "Accept-Language": "en-US,en; q = 0.9",
-        //                 "Sec-Fetch-Mode": "navigate",
-        //                 "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit / 605.1.15(KHTML, like Gecko) Version / 18.6 Safari / 605.1.15",
-        //                 "Accept-Encoding": "gzip, deflate, br",
-        //                 "Connection": "keep-alive",
-        //                 "Priority": "u=0, i"
-        //             },
-        //         };
-        //         let productData = {upc: upc}
-        //         axios.request(config)
-        //             .then((response) => {
-        //                 console.log(response.status)
-        //                 if(response.status !== 200){
-        //                     resolve({status: response.status})
-        //                 }
-        //                 else{
-        //                     const d = response.data.split('\n')
-        //                     d.forEach((v, k) => {
-        //                         if (v.includes('<title>')) {
-        //                             productData.description = v.replace('<title>', '')
-        //                                 .replace('</title>', '')
-        //                                 .replace(/— UPC [0-9]* — Go-UPC/g, '')
-        //                                 .replace('&amp;', '&')
-        //                                 .trimLeft()
-        //                                 .trimRight();
-        //                             console.log(`found title: ${productData.description}`)
-        //                         }
-        //                         else if (v.includes('Category') && v.includes('<td')) {
-        //                             productData.category = d[k + 1].replace('<td>', '')
-        //                                 .replace('</td>', '')
-        //                                 .replace('&amp;', '&')
-        //                                 .trimLeft()
-        //                                 .trimRight();
-        //                             console.log(`here is the category: ${d[k + 1]}`)
-        //                             console.log(` line before: ${d[k]}`)
-        //                         }
-        //                         else if (v.includes('aws')) {
-        //                             productData.imgURL = v
-        //                                 .replace('<img src=', '')
-        //                             // .replace(/alt[A-Za-z0-9]*/g, '');
-        //                             console.log(v)
+    });
+}
 
-        //                         }
-        //                         // console.log(`${k} => ${v}`)
-        //                     })
-        //                     productData.source = "go-upc.com";
-        //                     resolve(productData)
-        //                 }
-                        
-        //             })
+const lookupUPC_upcdatabase = (upc) => {
+    // get data from go-upc.com
+    return new Promise(async (resolve, reject) => {
+        try {
+            const cfg = {
+                method: 'get',
+                url: `https://api.upcdatabase.org/product/${upc}\?apikey\=${config.UPCDATABASE_KEY}`
+            }
             
-        // }
-        // catch (error) {
-        //     console.log(error);
-        //     reject(new Error(`Cannot get product`));
-        // }
+            axios.request(cfg)
+                .then((response) => {
+                    // console.log(response.status)
+                    // console.log(response.headers)
+
+                    // console.log('------------------', `Lookups remaining: ${response.headers['x-ratelimit-remaining']}`, '------------------')
+
+                    if (response.status !== 200) {
+                        resolve({ status: response.status })
+                    }
+                    else {
+                        // response.data.source = "upcdatabase.org";
+                        response.data.source = "upcitemdb.com"
+                        response.data.upc = upc;
+                        resolve(response.data)
+                    }
+                })
+                .catch(error => {
+                    resolve(error.response.status)
+                })
+        }
+        catch (error) {
+            console.log(error);
+            reject(new Error(`Cannot get product`));
+        }
+    });
+}
+
+const lookupUPC_openfoodfacts = (upc) => {
+    // get data from go-upc.com
+    return new Promise(async (resolve, reject) => {
+        try {
+            const cfg = {
+                method: 'get',
+                url: `https://world.openfoodfacts.org/api/v2/product/${upc}`
+            }
+
+            axios.request(cfg)
+                .then((response) => {
+                    // console.log(response.status)
+                    // console.log(response.headers)
+
+                    // console.log('------------------', `Lookups remaining: ${response.headers['x-ratelimit-remaining']}`, '------------------')
+
+                    if (response.status !== 200) {
+                        resolve({ status: response.status })
+                    }
+                    else {
+                        // response.data.source = "upcdatabase.org";
+                        response.data.source = "upcitemdb.com"
+                        response.data.upc = upc;
+                        resolve(response.data)
+                    }
+                })
+                .catch(error => {
+                    resolve(error.response.status)
+                })
+        }
+        catch (error) {
+            console.log(error);
+            reject(new Error(`Cannot get product`));
+        }
     });
 }
 
 const createProduct = (product) => {
     return new Promise(async (resolve, reject) => {
         try {
+            console.log(`creating product...`)
             // await db.sequelize.models.products.upsert(product);
             // let p = await db.sequelize.models.products.findOne({
             //     where: { upc: product.upc}
@@ -140,11 +160,17 @@ const createProduct = (product) => {
             await client.connect()
             const database = client.db("charityCC");
             const collection = database.collection("products");
-            const p = await collection.insertOne(product, function (err, result) {
-                if (err) throw err;
-                console.log("1 document inserted");
-                client.close();
-            });
+            product.title = product.description;
+            product.success = true;
+            // const p = await collection.insertOne(product, function (err, result) {
+            //     if (err) throw err;
+            //     console.log("1 document inserted");
+            //     client.close();
+            // });
+            const p = await collection.updateOne({ upc: product.upc },
+                { $set: product },
+                { upsert: true }
+            )
 
             resolve(product);
         }
@@ -156,6 +182,7 @@ const createProduct = (product) => {
 }
 
 const updateProduct = (product) => {
+    console.log(product)
     return new Promise(async (resolve, reject) => {
         try {
             console.log('trying to update')
@@ -165,6 +192,8 @@ const updateProduct = (product) => {
             const filter = {upc: product.upc}
             const database = client.db("charityCC");
             const collection = database.collection("products");
+            product.title = product.description;
+            product.success = true;
             const p = await collection.updateOne({upc: product.upc},
                 { $set: product },
                 { upsert: true }
@@ -208,7 +237,9 @@ const getAllProducts = async () => {
 }
 module.exports = {
     lookupDatabase,
-    lookupUPC,
+    lookupUPC_upcitemdb,
+    lookupUPC_upcdatabase,
+    lookupUPC_openfoodfacts,
     createProduct,
     getAllProducts,
     updateProduct
