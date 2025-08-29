@@ -59,6 +59,7 @@ lookupProduct = () => {
                             $('#lookupProductCategory').val(data.category)
                             $('#lookupProductSize').val(data.size)
                             $('#lookupProductSource').val(data.source)
+
                             // if(item.images){
                             //     let imgSrc = "";
                             //     Object.keys(item.images).forEach((v) =>{
@@ -203,4 +204,22 @@ truncateString = (str, maxLength=20) => {
         // Otherwise, return the original string
         return str;
     }
+}
+
+useThisImage = (imgURL, upc) => {
+    console.log(`we're going to use this image: ${imgURL}`)
+    $.ajax({
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({url: `${imgURL}`}),
+        url: `/products/download_image/${upc}`,
+        success: function (d) {
+            console.log(d)
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.readyState == 0)
+                window.location.replace(global_site_redirect);
+            $("#bsNetworkStatus").html(jqXHR);
+        }
+    });
 }

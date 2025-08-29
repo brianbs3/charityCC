@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { formatJSON11 } = require('../utils/format');
+
 const { fix, lookupUPC_upcitemdb, lookupUPC_upcdatabase, lookupUPC_openfoodfacts, lookupDatabase, createProduct, getAllProducts, updateProduct } = require('../utils/products');
 // const knex = require('../config/knex');
 const pjson = require('../package.json');
@@ -83,9 +84,11 @@ router.get('/lookup/:upc', async (req, res) => {
         // console.log(alternate);
         
         return res.json(prod)
+
     }
-    
-    
+    catch(error) {
+        console.log(error)
+    }
 });
 
 router.get('/details/:upc', async (req, res) => {
@@ -147,23 +150,18 @@ router.post('/add', async (req, res) => {
         console.log(error)
         return res.json(error)
     }
-    // let p = await db.sequelize.models.products.findAll();
-    // return res.json(formatJSON11(p));
-    //             if(p){
-    //                 p.dataValues.source = "database";
-
-    //                 resolve(p);
-    //             }
-    //             else{
-    //                 resolve(null);
-    //             }
-    // knex.select()
-    //     .from('products')
-    //     .orderBy('description')
-    //     .then(
-    //         m => {
-    //             return res.json(formatJSON11(m));
-    //         }
-    //     );
 });
+
+router.post('/download_image/:upc', async (req, res) => {
+    console.log(req.body)
+    const { upc } = req.params;
+    const {url} = req.body;
+    try {
+        download_image(url, `${upc}`)
+    }
+    catch(error) {
+        console.log(error);
+    }
+});
+
 module.exports = router;

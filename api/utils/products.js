@@ -1,6 +1,7 @@
 'use strict';
 const knex = require('../config/knex');
 const axios = require('axios');
+const fs = require('fs');
 const db = require('../models'); 
 const config = require('../config')
 const { MongoClient } = require('mongodb');
@@ -299,7 +300,7 @@ const getAllProducts = async () => {
             resolve(p);
 
         } catch(error){
-            // console.log(error)
+            console.log(error)
             reject('error getting all products')
         }
     });
@@ -314,6 +315,7 @@ const truncateString = (str, maxLength = 20) => {
         return str;
     }
 }
+
 module.exports = {
     lookupDatabase,
     lookupUPC_upcitemdb,
@@ -324,4 +326,5 @@ module.exports = {
     updateProduct,
     truncateString,
     fix
+
 };
