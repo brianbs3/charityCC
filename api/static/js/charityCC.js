@@ -50,8 +50,6 @@ lookupProduct = () => {
                     type: 'GET',
                     url: `/products/lookup/${upc}`,
                     success: function (data) {
-                        console.log(data)
-                        
                         if(data && Object.keys(data).length > 0){
                             
                             $('#lookupProductDescription').val(data.description)
@@ -112,9 +110,6 @@ populateAllProductsTable = () => {
                 
                 
                 if(d){
-                    // const item = d.items[0];
-                    console.log(d)
-                    
                     $('#allProductBody').append(
                         `<tr>
                     <td>${++count}</td>

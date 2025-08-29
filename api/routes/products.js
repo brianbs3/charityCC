@@ -52,42 +52,45 @@ router.get('/fix/:upc', async (req, res) => {
     
 });
 router.get('/lookup/:upc', async (req, res) => {
-    const { upc } = req.params;
-    console.log(`looking up upc: ${upc}`)
-    const [product] = await Promise.all([
-        lookupDatabase(upc)
-    ])
-    if(product){
-        return res.json(product)
-    }
-    else{
-        console.log(`${upc} not found`)
-        const [prod] = await Promise.all([
-            lookupUPC_upcitemdb(upc),
+    try{
+        const { upc } = req.params;
+        console.log(`looking up upc: ${upc}`)
+        const [product] = await Promise.all([
+            lookupDatabase(upc)
         ])
-
-        // if(Object.keys(prod.items).length === 0){
-        //     const [upcdatabase, openFoodFacts] = await Promise.all([
-        //     // const [openFoodFacts] = await Promise.all([
-        //         lookupUPC_upcdatabase(upc),
-        //         lookupUPC_openfoodfacts(upc)
-        //     ])
-        //     console.log(upcdatabase);
-        //     console.log(openFoodFacts);
-        // }
-        console.log(prod);
-        if(prod){
-            updateProduct(prod);
+        if(product){
+            return res.json(product)
         }
-        
-        // console.log(prod)
-        // console.log(alternate);
-        
-        return res.json(prod)
+        else{
+            console.log(`${upc} not found`)
+            const [prod] = await Promise.all([
+                lookupUPC_upcitemdb(upc),
+            ])
 
+            // if(Object.keys(prod.items).length === 0){
+            //     const [upcdatabase, openFoodFacts] = await Promise.all([
+            //     // const [openFoodFacts] = await Promise.all([
+            //         lookupUPC_upcdatabase(upc),
+            //         lookupUPC_openfoodfacts(upc)
+            //     ])
+            //     console.log(upcdatabase);
+            //     console.log(openFoodFacts);
+            // }
+            console.log(prod);
+            if(prod){
+                updateProduct(prod);
+            }
+            
+            // console.log(prod)
+            // console.log(alternate);
+            
+            return res.json(prod)
+
+        }
     }
     catch(error) {
         console.log(error)
+        res.status(500).json({msg: `error looking up ${upc}`})
     }
 });
 
