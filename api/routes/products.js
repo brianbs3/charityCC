@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { formatJSON11 } = require('../utils/format');
-const { lookupUPC_upcitemdb, lookupUPC_upcdatabase, download_image, lookupUPC_openfoodfacts, lookupDatabase, createProduct, getAllProducts, updateProduct } = require('../utils/products');
+
+const { fix, lookupUPC_upcitemdb, lookupUPC_upcdatabase, lookupUPC_openfoodfacts, lookupDatabase, createProduct, getAllProducts, updateProduct } = require('../utils/products');
 // const knex = require('../config/knex');
 const pjson = require('../package.json');
 const config = require('../config')
@@ -34,38 +35,56 @@ router.get('/lookup_mongo/:upc', async (req, res) => {
     }
 });
 
-router.get('/lookup/:upc', async (req, res) => {
-    try{
+router.get('/fix/:upc', async (req, res) => {
+    try {
         const { upc } = req.params;
-        console.log(`upc: ${upc}`)
-        const [product] = await Promise.all([
-            lookupDatabase(upc)
+        console.log(`attempting to fix ${upc}`)
+        const [fixed] = await Promise.all([
+            fix(upc)
         ])
-        if(product){
-            return res.json(product)
-        }
-        else{
-            console.log(`${upc} not found`)
-            const [prod] = await Promise.all([
-                lookupUPC_upcitemdb(upc),
-            ])
+        return res.json(fixed)
+    }
+    catch (error) {
+        console.log('there was an error')
+        console.log(error)
+        return res.json(error)
+    }
+    
+});
+router.get('/lookup/:upc', async (req, res) => {
+    const { upc } = req.params;
+    console.log(`looking up upc: ${upc}`)
+    const [product] = await Promise.all([
+        lookupDatabase(upc)
+    ])
+    if(product){
+        return res.json(product)
+    }
+    else{
+        console.log(`${upc} not found`)
+        const [prod] = await Promise.all([
+            lookupUPC_upcitemdb(upc),
+        ])
 
-            if(Object.keys(prod.items).length === 0){
-            }
-                const [upcdatabase, openFoodFacts] = await Promise.all([
-                // const [openFoodFacts] = await Promise.all([
-                    lookupUPC_upcdatabase(upc),
-                    lookupUPC_openfoodfacts(upc)
-                ])
-                console.log(upcdatabase);
-                console.log(openFoodFacts);
-            
-            createProduct(prod);
-            // console.log(prod)
-            // console.log(alternate);
-            
-            return res.json(prod)
+        // if(Object.keys(prod.items).length === 0){
+        //     const [upcdatabase, openFoodFacts] = await Promise.all([
+        //     // const [openFoodFacts] = await Promise.all([
+        //         lookupUPC_upcdatabase(upc),
+        //         lookupUPC_openfoodfacts(upc)
+        //     ])
+        //     console.log(upcdatabase);
+        //     console.log(openFoodFacts);
+        // }
+        console.log(prod);
+        if(prod){
+            updateProduct(prod);
         }
+        
+        // console.log(prod)
+        // console.log(alternate);
+        
+        return res.json(prod)
+
     }
     catch(error) {
         console.log(error)
