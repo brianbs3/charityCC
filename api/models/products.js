@@ -11,6 +11,9 @@ module.exports = function (sequelize, DataTypes) {
         upc: { type: Sequelize.DOUBLE },
         description: { type: Sequelize.STRING },
         category: { type: Sequelize.STRING },
+        brand: { type: Sequelize.STRING },
+        size: { type: Sequelize.STRING },
+        source: { type: Sequelize.STRING },
         img_url: { type: Sequelize.INTEGER },
         created: { type: Sequelize.TIME },
         updated: { type: Sequelize.TIME }
